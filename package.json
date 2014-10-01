@@ -1,0 +1,47 @@
+{
+  "name": "hubot-steam",
+  "description": "A Hubot script for interacting with Steam Web API (primarily for Dota 2).",
+  "version": "1.0.0",
+
+  "author": "Ian Lai <ian@fyianlai.com>",
+  "license": "MIT",
+
+  "keywords": [
+    "hubot",
+    "hubot-scripts",
+    "steam",
+    "dota 2",
+    "games",
+    "matches",
+    "history"
+  ],
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ClaudeBot/hubot-steam.git"
+  },
+
+  "bugs": {
+    "url": "https://github.com/ClaudeBot/hubot-steam/issues"
+  },
+
+  "dependencies": {
+    "coffee-script": "~1.6",
+    "moment": "^2.8.3",
+    "msgpack": "^0.2.3",
+    "ref": "^0.3.2"
+  },
+
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "sinon-chai": "*",
+    "sinon": "*"
+  },
+
+  "main": "index.coffee",
+
+  "scripts": {
+    "test": "script/test"
+  }
+}
