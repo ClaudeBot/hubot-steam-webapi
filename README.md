@@ -33,4 +33,4 @@ Command | Description
 hubot steam __id__ `[me] custom URL` | Returns the Steam ID for the user under http://steamcommunity.com/id/`custom URL`
 hubot steam __status__ `Steam ID|custom URL` | Returns `Steam ID` or `custom URL` community status
 hubot dota __history__ `Steam ID|custom URL` | Returns metadata for the latest 5 game lobbies with <Steam ID> or <custom URL>
-hubot dota __match__ `match ID` `[Steam ID|custom URL]` | Returns information about a particular `match ID`. Optionally, if `Steam ID` or `custom URL` is included, its match information will also be returned
+hubot dota __match__ `match ID [Steam ID|custom URL]` | Returns information about a particular `match ID`. Optionally, if `Steam ID` or `custom URL` is included, its match information will also be returned
