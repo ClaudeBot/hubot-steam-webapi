@@ -1,11 +1,6 @@
 # Description:
 #   Steam Web API w/ Dota 2
 #
-# Dependencies:
-#   "moment": "^2.8.3"
-#   "msgpack": "^0.2.3"
-#   "ref": "^0.3.2"
-#
 # Configuration:
 #   STEAM_API_KEY
 #
