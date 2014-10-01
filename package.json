@@ -18,11 +18,11 @@
 
   "repository": {
     "type": "git",
-    "url": "https://github.com/ClaudeBot/hubot-steam.git"
+    "url": "https://github.com/ClaudeBot/hubot-steam-webapi.git"
   },
 
   "bugs": {
-    "url": "https://github.com/ClaudeBot/hubot-steam/issues"
+    "url": "https://github.com/ClaudeBot/hubot-steam-webapi/issues"
   },
 
   "dependencies": {
