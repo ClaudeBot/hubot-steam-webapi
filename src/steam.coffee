@@ -203,7 +203,7 @@ module.exports = (robot) ->
             for match in history.matches
                 date = moment.unix(match.start_time).fromNow()
                 target = _GetPlayer communityID, match.players
-                hero = _GetHero(target.hero_id).LocalizedName
+                hero = _GetHero(target.hero_id)?.LocalizedName or "No hero"
                 # TODO: W / L TBA
                 msg.send "Match ID: #{match.match_id} | Lobby: #{DOTA_LOBBIES[match.lobby_type]} | Hero: #{hero} | #{date}"
 
