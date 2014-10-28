@@ -1,5 +1,7 @@
 # Hubot: Steam Web API
 
+[![Dependency Status](https://david-dm.org/ClaudeBot/hubot-steam-webapi.svg?style=flat-square)](https://david-dm.org/ClaudeBot/hubot-steam-webapi)
+
 A Hubot script for interacting with Steam Web API (primarily for Dota 2).
 
 
