@@ -165,7 +165,7 @@ _GetPlayer = (communityID, playersPool) ->
 #
 Init = (robot) ->
     if not STEAM_API_KEY?
-        return robot.logger.debug "Missing STEAM_API_KEY in environment. Please set and try again."
+        return robot.logger.error "Missing STEAM_API_KEY in environment. Please set and try again."
 
     fs.readFile DOTA_HEROES_DATA_PATH, (err, data) ->
         return robot.logger.error if err
