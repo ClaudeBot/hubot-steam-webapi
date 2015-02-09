@@ -8,7 +8,7 @@
 # Commands:
 #   hubot steam id [me] <custom URL> - Returns the Steam ID for the user under http://steamcommunity.com/id/<custom URL>
 #   hubot steam status <Steam ID|custom URL> - Returns <Steam ID> or <custom URL> community status
-#   hubot dota history <Steam ID|custom URL> - Returns metadata for the latest 5 game lobbies with <Steam ID> or <custom URL>
+#   hubot dota history <Steam ID|custom URL> - Returns metadata for the latest DOTA_MAX_RESULTS (or 5) game lobbies with <Steam ID> or <custom URL>
 #   hubot dota match <match ID> [<Steam ID|custom URL>] - Returns information about a particular <match ID>. Optionally, if <Steam ID> or <custom URL> is included, its match information will also be returned
 #
 # Author:
