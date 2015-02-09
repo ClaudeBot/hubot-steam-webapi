@@ -3,6 +3,7 @@
 #
 # Configuration:
 #   STEAM_API_KEY
+#   DOTA_MAX_RESULTS
 #
 # Commands:
 #   hubot steam id [me] <custom URL> - Returns the Steam ID for the user under http://steamcommunity.com/id/<custom URL>
@@ -28,7 +29,7 @@ require "ref"
 STEAM_API_KEY = process.env.STEAM_API_KEY
 STEAM_API_URL = "https://api.steampowered.com"
 DOTA_HEROES_DATA_PATH = "data/heroes.bin"
-DOTA_MAX_RESULTS = 5
+DOTA_MAX_RESULTS = process.env.DOTA_MAX_RESULTS or 5
 
 #
 # Definitions
