@@ -148,7 +148,7 @@ GetMatchHistory = (msg, genericID, callback) ->
             history steamID, "profile URL"
 
 _GetHero = (heroID) ->
-    return hero for hero in DOTA_HEROES.Heroes when hero.Id is heroID
+    return hero for hero in DOTA_HEROES.heroes when hero.id is heroID
 
 _GetTowers = (dec) ->
     for status, tower in "00000000000#{(+dec).toString(2)}".slice(-11).split("")
@@ -169,7 +169,7 @@ Init = (robot) ->
         return robot.logger.error "Missing STEAM_API_KEY in environment. Please set and try again."
 
     fs.readFile DOTA_HEROES_DATA_PATH, (err, data) ->
-        return robot.logger.error if err
+        return robot.logger.error(err) if err
         DOTA_HEROES = msgpack.unpack data
 
 _PossessionModifier = (noun) ->
@@ -204,7 +204,7 @@ module.exports = (robot) ->
             for match in history.matches
                 date = moment.unix(match.start_time).fromNow()
                 target = _GetPlayer communityID, match.players
-                hero = _GetHero(target.hero_id)?.LocalizedName or "No hero"
+                hero = _GetHero(target.hero_id)?.localized_name or "No hero"
                 # TODO: W / L TBA
                 msg.send "Match ID: #{match.match_id} | Lobby: #{DOTA_LOBBIES[match.lobby_type]} | Hero: #{hero} | #{date}"
 
@@ -230,7 +230,7 @@ module.exports = (robot) ->
                     msg.reply "The #{type} you have entered (\"#{genericID}\") was not found in Match ID #{match.match_id}."
                     return
                 faction = _GetFaction target.player_slot
-                msg.reply "#{faction} - #{_GetHero(target.hero_id).LocalizedName} (Lvl #{target.level}) | KDA: #{target.kills}/#{target.deaths}/#{target.assists} | LH: #{target.last_hits} | GPM: #{target.gold_per_min} | XPM: #{target.xp_per_min} | HD: #{target.hero_damage} | TD: #{target.tower_damage} | TGE: #{target.gold_per_min*duration}"
+                msg.reply "#{faction} - #{_GetHero(target.hero_id).localized_name} (Lvl #{target.level}) | KDA: #{target.kills}/#{target.deaths}/#{target.assists} | LH: #{target.last_hits} | GPM: #{target.gold_per_min} | XPM: #{target.xp_per_min} | HD: #{target.hero_damage} | TD: #{target.tower_damage} | TGE: #{target.gold_per_min*duration}"
                 # Future (TODO): Team fight contribution? Overall contribution algo.
 
             if genericID?
