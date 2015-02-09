@@ -21,7 +21,7 @@ A Hubot script for interacting with Steam Web API (primarily for Dota 2).
     ]
     ```
 
-3. Run `npm install`
+3. Run your bot and see below for available config / commands
 
 
 ## Configuration
