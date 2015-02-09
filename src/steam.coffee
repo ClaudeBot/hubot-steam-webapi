@@ -19,6 +19,8 @@
 #   * Community name? (Alias)
 
 fs = require "fs"
+path = require "path"
+
 moment = require "moment"
 msgpack = require "msgpack"
 require "ref"
@@ -28,7 +30,7 @@ require "ref"
 #
 STEAM_API_KEY = process.env.STEAM_API_KEY
 STEAM_API_URL = "https://api.steampowered.com"
-DOTA_HEROES_DATA_PATH = "data/heroes.bin"
+DOTA_HEROES_DATA_PATH = "../data/heroes.bin"
 DOTA_MAX_RESULTS = process.env.DOTA_MAX_RESULTS or 5
 
 #
@@ -168,7 +170,7 @@ Init = (robot) ->
     if not STEAM_API_KEY?
         return robot.logger.error "Missing STEAM_API_KEY in environment. Please set and try again."
 
-    fs.readFile DOTA_HEROES_DATA_PATH, (err, data) ->
+    fs.readFile path.join(__dirname, DOTA_HEROES_DATA_PATH), (err, data) ->
         return robot.logger.error(err) if err
         DOTA_HEROES = msgpack.unpack data
 
