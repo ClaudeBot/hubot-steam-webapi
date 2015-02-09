@@ -1,7 +1,7 @@
 {
   "name": "hubot-steam-webapi",
   "description": "A Hubot script for interacting with Steam Web API (primarily for Dota 2).",
-  "version": "1.0.1",
+  "version": "1.0.2",
 
   "author": "Ian Lai <ian@fyianlai.com>",
   "license": "MIT",
