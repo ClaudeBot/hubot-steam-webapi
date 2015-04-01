@@ -2,10 +2,8 @@
   "name": "hubot-steam-webapi",
   "description": "A Hubot script for interacting with Steam Web API (primarily for Dota 2).",
   "version": "2.0.3",
-
   "author": "Ian Lai <ian@fyianlai.com>",
   "license": "MIT",
-
   "keywords": [
     "hubot",
     "hubot-scripts",
@@ -15,26 +13,20 @@
     "matches",
     "history"
   ],
-
   "repository": {
     "type": "git",
     "url": "https://github.com/ClaudeBot/hubot-steam-webapi.git"
   },
-
   "bugs": {
     "url": "https://github.com/ClaudeBot/hubot-steam-webapi/issues"
   },
-
   "dependencies": {
     "moment": "^2.9.0",
-    "msgpack": "^0.2.4",
     "ref": "^1.0.0"
   },
-
   "peerDependencies": {
     "hubot": "2.x"
   },
-
   "devDependencies": {
     "hubot": "2.x",
     "mocha": "*",
@@ -46,9 +38,7 @@
     "matchdep": "~0.1.2",
     "grunt-contrib-watch": "~0.5.3"
   },
-
   "main": "index.coffee",
-
   "scripts": {
     "test": "grunt test"
   }
