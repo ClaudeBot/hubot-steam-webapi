@@ -22,7 +22,6 @@ fs = require "fs"
 path = require "path"
 
 moment = require "moment"
-msgpack = require "msgpack"
 require "ref"
 
 #
@@ -82,7 +81,8 @@ GetSteamResult = (msg, endpoint, params = {}, handler, version = 1) ->
             if err or res.statusCode isnt 200
                 err = "Bad request (invalid Steam web API key)" if res.statusCode is 400
                 msg.reply "An error occurred while attempting to process your request. Please try again later."
-                return msg.robot.logger.error err
+                log = if msg.logger? then msg.logger else msg.robot.logger
+                return log.error err
             handler JSON.parse(body)
 
 #
@@ -124,6 +124,13 @@ _IsSteamID = (steamID) ->
 #
 # Dota API
 #
+GetHeroes = (msg, callback) ->
+    GetSteamResult msg, "IEconDOTA2_570/GetHeroes", language: "en", (object) ->
+        mappedHeroes = {}
+        for hero in object.result.heroes
+            mappedHeroes[hero.id] = hero.localized_name
+        callback mappedHeroes
+
 GetMatchDetails = (msg, matchID, callback) ->
     GetSteamResult msg, "IDOTA2Match_570/GetMatchDetails", match_id: matchID, (object) ->
         callback object.result
@@ -149,9 +156,6 @@ GetMatchHistory = (msg, genericID, callback) ->
         GetSteamID msg, genericID, (steamID) ->
             history steamID, "profile URL"
 
-_GetHero = (heroID) ->
-    return hero for hero in DOTA_HEROES.heroes when hero.id is heroID
-
 _GetTowers = (dec) ->
     for status, tower in "00000000000#{(+dec).toString(2)}".slice(-11).split("")
         if parseInt(status) then DOTA_TOWERS[tower] else continue
@@ -170,9 +174,9 @@ Init = (robot) ->
     if not STEAM_API_KEY?
         return robot.logger.error "Missing STEAM_API_KEY in environment. Please set and try again."
 
-    fs.readFile path.join(__dirname, DOTA_HEROES_DATA_PATH), (err, data) ->
-        return robot.logger.error(err) if err
-        DOTA_HEROES = msgpack.unpack data
+    robot.logger.debug "Loading heroes..."
+    GetHeroes robot, (heroes) ->
+        DOTA_HEROES = heroes
 
 _PossessionModifier = (noun) ->
     noun += if noun.slice(-1) is "s" then "'" else "'s"
@@ -206,7 +210,7 @@ module.exports = (robot) ->
             for match in history.matches
                 date = moment.unix(match.start_time).fromNow()
                 target = _GetPlayer communityID, match.players
-                hero = _GetHero(target.hero_id)?.localized_name or "No hero"
+                hero = DOTA_HEROES[target.hero_id] or "No hero"
                 # TODO: W / L TBA
                 msg.send "Match ID: #{match.match_id} | Lobby: #{DOTA_LOBBIES[match.lobby_type]} | Hero: #{hero} | #{date}"
 
@@ -223,7 +227,10 @@ module.exports = (robot) ->
             direTowers = _GetTowers(match.tower_status_dire).join(", ") or "None"
 
             msg.send "Match ID #{match.match_id} is a #{DOTA_LOBBIES[match.lobby_type].toLowerCase()} game that took place #{date}. The #{victor} won the game in #{duration} minutes. First blood was drawn #{firstBlood} into the game."
+
+            # Generate map image and graphs?
             msg.send "Radiant towers remaining: #{radiantTowers} | Dire towers remaining: #{direTowers}"
+            msg.send "Dotabuff: http://www.dotabuff.com/matches/#{match.match_id}"
 
             additionalInfo = (steamID, type = "Steam ID") ->
                 communityID = _GetCommunityID steamID
@@ -232,7 +239,8 @@ module.exports = (robot) ->
                     msg.reply "The #{type} you have entered (\"#{genericID}\") was not found in Match ID #{match.match_id}."
                     return
                 faction = _GetFaction target.player_slot
-                msg.reply "#{faction} - #{_GetHero(target.hero_id).localized_name} (Lvl #{target.level}) | KDA: #{target.kills}/#{target.deaths}/#{target.assists} | LH: #{target.last_hits} | GPM: #{target.gold_per_min} | XPM: #{target.xp_per_min} | HD: #{target.hero_damage} | TD: #{target.tower_damage} | TGE: #{target.gold_per_min*duration}"
+                hero = DOTA_HEROES[target.hero_id] or "No hero"
+                msg.reply "#{faction} - #{hero} (Lvl #{target.level}) | KDA: #{target.kills}/#{target.deaths}/#{target.assists} | LH: #{target.last_hits} | GPM: #{target.gold_per_min} | XPM: #{target.xp_per_min} | HD: #{target.hero_damage} | TD: #{target.tower_damage} | TGE: #{target.gold_per_min*duration}"
                 # Future (TODO): Team fight contribution? Overall contribution algo.
 
             if genericID?
