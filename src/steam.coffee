@@ -29,7 +29,6 @@ require "ref"
 #
 STEAM_API_KEY = process.env.STEAM_API_KEY
 STEAM_API_URL = "https://api.steampowered.com"
-DOTA_HEROES_DATA_PATH = "../data/heroes.bin"
 DOTA_MAX_RESULTS = process.env.DOTA_MAX_RESULTS or 5
 
 #
@@ -70,6 +69,13 @@ DOTA_TOWERS = [
 DOTA_HEROES = {}
 
 #
+# Brain / Persistence
+#
+_brain = null
+_GetSteamData = ->
+    _brain.data.steam or= {}
+
+#
 # Steam API
 #
 GetSteamResult = (msg, endpoint, params = {}, handler, version = 1) ->
@@ -89,16 +95,33 @@ GetSteamResult = (msg, endpoint, params = {}, handler, version = 1) ->
 # User API
 #
 GetSteamID = (msg, customURL, callback) ->
+    # Retrieve from cache
+    return callback steamID for steamID, user of _GetSteamData() when user.url is customURL
+
+    # Retrieve from API
     GetSteamResult msg, "ISteamUser/ResolveVanityURL", vanityurl: customURL, (object) ->
         if object.response.success is 42
             msg.reply "The custom URL you have entered (\"#{customURL}\") does not exist."
             return
+
+        # Cache results
+        _GetSteamData()[object.response.steamid] or= {}
+        _GetSteamData()[object.response.steamid].url = customURL
         callback object.response.steamid
 
 _GetCommunityID = (steamID) ->
+    # Retrieve from cache
+    if _GetSteamData()[steamID]?.cID?
+        return _GetSteamData()[steamID].cID
+
+    # Retrieve through calculating
     buffer = new Buffer 8
     buffer.writeUInt64LE steamID, 0
     communityID = buffer.readUInt32LE 0
+
+    # Cache results
+    _GetSteamData()[steamID] or= {}
+    _GetSteamData()[steamID].cID = communityID
     communityID
 
 GetPlayerSummaries = (msg, genericID, callback) ->
@@ -176,6 +199,10 @@ Init = (robot) ->
 
     GetHeroes robot, (heroes) ->
         DOTA_HEROES = heroes
+
+    # TODO: Cleaner dependency
+    robot.brain.resetSaveInterval 1800
+    _brain = robot.brain
 
 _PossessionModifier = (noun) ->
     noun += if noun.slice(-1) is "s" then "'" else "'s"
