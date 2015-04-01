@@ -174,7 +174,6 @@ Init = (robot) ->
     if not STEAM_API_KEY?
         return robot.logger.error "Missing STEAM_API_KEY in environment. Please set and try again."
 
-    robot.logger.debug "Loading heroes..."
     GetHeroes robot, (heroes) ->
         DOTA_HEROES = heroes
 

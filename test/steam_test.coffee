@@ -8,6 +8,10 @@ describe "steam", ->
     beforeEach ->
         @robot =
             respond: sinon.spy()
+            http: ->
+                query: ->
+                    get: ->
+                        sinon.spy()
 
         require("../src/steam")(@robot)
 
