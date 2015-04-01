@@ -7,11 +7,13 @@ expect = chai.expect
 describe "steam", ->
     beforeEach ->
         @robot =
-            respond: sinon.spy()
+            brain:
+                resetSaveInterval: sinon.spy()
             http: ->
                 query: ->
                     get: ->
                         sinon.spy()
+            respond: sinon.spy()
 
         require("../src/steam")(@robot)
 
