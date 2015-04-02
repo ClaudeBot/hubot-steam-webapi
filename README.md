@@ -8,17 +8,17 @@ A Hubot script for interacting with Steam Web API (primarily for Dota 2).
 
 ## Installation via NPM
 
-1. Install the __hubot-steam__ module as a Hubot dependency by running:
+1. Install the __hubot-steam-webapi__ module as a Hubot dependency by running:
 
     ```
-    npm install --save hubot-steam
+    npm install --save hubot-steam-webapi
     ```
 
-2. Enable the script by adding the __hubot-steam__ entry to your `external-scripts.json` file:
+2. Enable the script by adding the __hubot-steam-webapi__ entry to your `external-scripts.json` file:
 
     ```json
     [
-        "hubot-steam"
+        "hubot-steam-webapi"
     ]
     ```
 
