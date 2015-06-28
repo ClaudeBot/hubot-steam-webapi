@@ -78,30 +78,30 @@ _GetSteamData = ->
 #
 # Steam API
 #
-GetSteamResult = (msg, endpoint, params = {}, handler, version = 1) ->
+GetSteamResult = (res, endpoint, params = {}, handler, version = 1) ->
     params.key = STEAM_API_KEY
 
-    msg.http("#{STEAM_API_URL}/#{endpoint}/v#{version}/")
+    res.http("#{STEAM_API_URL}/#{endpoint}/v#{version}/")
         .query(params)
-        .get() (err, res, body) ->
-            if err or res.statusCode isnt 200
-                err = "Bad request (invalid Steam web API key)" if res.statusCode is 400
-                msg.reply "An error occurred while attempting to process your request. Please try again later."
-                log = if msg.logger? then msg.logger else msg.robot.logger
-                return log.error err
+        .get() (err, httpRes, body) ->
+            if err or httpRes.statusCode isnt 200
+                err = "Bad request (invalid Steam web API key)" if httpRes.statusCode is 400
+                res.reply "An error occurred while attempting to process your request. Please try again later."
+                log = if res.logger? then res.logger else res.robot.logger
+                return log.error "hubot-steam-webapi: #{err}"
             handler JSON.parse(body)
 
 #
 # User API
 #
-GetSteamID = (msg, customURL, callback) ->
+GetSteamID = (res, customURL, callback) ->
     # Retrieve from cache
     return callback steamID for steamID, user of _GetSteamData() when user.url is customURL
 
     # Retrieve from API
-    GetSteamResult msg, "ISteamUser/ResolveVanityURL", vanityurl: customURL, (object) ->
+    GetSteamResult res, "ISteamUser/ResolveVanityURL", vanityurl: customURL, (object) ->
         if object.response.success is 42
-            msg.reply "The custom URL you have entered (\"#{customURL}\") does not exist."
+            res.reply "The custom URL you have entered (\"#{customURL}\") does not exist."
             return
 
         # Cache results
@@ -124,9 +124,9 @@ _GetCommunityID = (steamID) ->
     _GetSteamData()[steamID].cID = communityID
     communityID
 
-GetPlayerSummaries = (msg, genericID, callback) ->
+GetPlayerSummaries = (res, genericID, callback) ->
     summary = (steamID) ->
-        GetSteamResult msg, "ISteamUser/GetPlayerSummaries", steamids: steamID, (object) ->
+        GetSteamResult res, "ISteamUser/GetPlayerSummaries", steamids: steamID, (object) ->
             callback object.response.players[0]
         , 2
 
@@ -135,7 +135,7 @@ GetPlayerSummaries = (msg, genericID, callback) ->
         summary genericID
     # Custom URL -> Steam ID
     else
-        GetSteamID msg, genericID, (steamID) ->
+        GetSteamID res, genericID, (steamID) ->
             summary steamID
 
 _GetStatus = (status = 0, invisible = 0) ->
@@ -147,28 +147,28 @@ _IsSteamID = (steamID) ->
 #
 # Dota API
 #
-GetHeroes = (msg, callback) ->
-    GetSteamResult msg, "IEconDOTA2_570/GetHeroes", language: "en", (object) ->
+GetHeroes = (res, callback) ->
+    GetSteamResult res, "IEconDOTA2_570/GetHeroes", language: "en", (object) ->
         mappedHeroes = {}
         for hero in object.result.heroes
             mappedHeroes[hero.id] = hero.localized_name
         callback mappedHeroes
 
-GetMatchDetails = (msg, matchID, callback) ->
-    GetSteamResult msg, "IDOTA2Match_570/GetMatchDetails", match_id: matchID, (object) ->
+GetMatchDetails = (res, matchID, callback) ->
+    GetSteamResult res, "IDOTA2Match_570/GetMatchDetails", match_id: matchID, (object) ->
         callback object.result
 
-GetMatchHistory = (msg, genericID, callback) ->
+GetMatchHistory = (res, genericID, callback) ->
     history = (steamID, type = "Steam ID") ->
         params =
             account_id: steamID
             matches_requested: DOTA_MAX_RESULTS
-        GetSteamResult msg, "IDOTA2Match_570/GetMatchHistory", params, (object) ->
+        GetSteamResult res, "IDOTA2Match_570/GetMatchHistory", params, (object) ->
             if object.result.status is 15
-                msg.reply "The user has disabled the \"Expose Public Match Data\" option."
+                res.reply "The user has disabled the \"Expose Public Match Data\" option."
                 return
             else if object.result.num_results is 0
-                msg.reply "No game matches were found for the #{type}: #{genericID}."
+                res.reply "No game matches were found for the #{type}: #{genericID}."
             callback steamID, object.result
 
     # Steam ID
@@ -176,7 +176,7 @@ GetMatchHistory = (msg, genericID, callback) ->
         history genericID
     # Custom URL -> Steam ID
     else
-        GetSteamID msg, genericID, (steamID) ->
+        GetSteamID res, genericID, (steamID) ->
             history steamID, "profile URL"
 
 _GetTowers = (dec) ->
@@ -195,7 +195,7 @@ _GetPlayer = (communityID, playersPool) ->
 #
 Init = (robot) ->
     if not STEAM_API_KEY?
-        return robot.logger.error "Missing STEAM_API_KEY in environment. Please set and try again."
+        return robot.logger.error "hubot-steam-webapi: Missing STEAM_API_KEY in environment. Please set and try again."
 
     GetHeroes robot, (heroes) ->
         DOTA_HEROES = heroes
@@ -214,23 +214,23 @@ module.exports = (robot) ->
     Init robot
 
     # GET 32-bit Steam ID
-    robot.respond /steam id( me)? (.+)/i, (msg) ->
-        customURL = msg.match[2]
-        GetSteamID msg, customURL, (steamID) ->
-            msg.reply "#{_PossessionModifier(customURL)} Steam ID is: #{steamID}"
+    robot.respond /steam id( me)? (.+)/i, (res) ->
+        customURL = res.match[2]
+        GetSteamID res, customURL, (steamID) ->
+            res.reply "#{_PossessionModifier(customURL)} Steam ID is: #{steamID}"
 
     # GET Steam profile status
-    robot.respond /steam status (.+)/i, (msg) ->
-        genericID = msg.match[1]
-        GetPlayerSummaries msg, genericID, (player) ->
+    robot.respond /steam status (.+)/i, (res) ->
+        genericID = res.match[1]
+        GetPlayerSummaries res, genericID, (player) ->
             status = _GetStatus player.personastate, player.communityvisibilitystate
             lastOnline = moment.unix(player.lastlogoff).fromNow()
-            msg.reply "#{genericID} belongs to #{player.personaname} who is currently #{status} and was last online #{lastOnline}."
+            res.reply "#{genericID} belongs to #{player.personaname} who is currently #{status} and was last online #{lastOnline}."
 
     # GET Player Dota 2 match history (overview)
-    robot.respond /dota history (.+)/i, (msg) ->
-        genericID = msg.match[1]
-        GetMatchHistory msg, genericID, (steamID, history) ->
+    robot.respond /dota history (.+)/i, (res) ->
+        genericID = res.match[1]
+        GetMatchHistory res, genericID, (steamID, history) ->
             communityID = _GetCommunityID steamID
 
             for match in history.matches
@@ -238,13 +238,13 @@ module.exports = (robot) ->
                 target = _GetPlayer communityID, match.players
                 hero = DOTA_HEROES[target.hero_id] or "No hero"
                 # TODO: W / L TBA
-                msg.send "Match ID: #{match.match_id} | Lobby: #{DOTA_LOBBIES[match.lobby_type]} | Hero: #{hero} | #{date}"
+                res.send "Match ID: #{match.match_id} | Lobby: #{DOTA_LOBBIES[match.lobby_type]} | Hero: #{hero} | #{date}"
 
     # GET Player Dota 2 match details
-    robot.respond /dota match (\d+)\s*(.+)?/i, (msg) ->
-        matchID = msg.match[1]
-        genericID = msg.match[2]
-        GetMatchDetails msg, matchID, (match) ->
+    robot.respond /dota match (\d+)\s*(.+)?/i, (res) ->
+        matchID = res.match[1]
+        genericID = res.match[2]
+        GetMatchDetails res, matchID, (match) ->
             date = moment.unix(match.start_time).fromNow()
             duration = moment.duration(match.duration, "seconds").minutes()
             firstBlood = moment.duration(match.first_blood_time, "seconds").humanize()
@@ -252,26 +252,26 @@ module.exports = (robot) ->
             radiantTowers = _GetTowers(match.tower_status_radiant).join(", ") or "None"
             direTowers = _GetTowers(match.tower_status_dire).join(", ") or "None"
 
-            msg.send "Match ID #{match.match_id} is a #{DOTA_LOBBIES[match.lobby_type].toLowerCase()} game that took place #{date}. The #{victor} won the game in #{duration} minutes. First blood was drawn #{firstBlood} into the game."
+            res.send "Match ID #{match.match_id} is a #{DOTA_LOBBIES[match.lobby_type].toLowerCase()} game that took place #{date}. The #{victor} won the game in #{duration} minutes. First blood was drawn #{firstBlood} into the game."
 
             # Generate map image and graphs?
-            msg.send "Radiant towers remaining: #{radiantTowers} | Dire towers remaining: #{direTowers}"
-            msg.send "Dotabuff: http://www.dotabuff.com/matches/#{match.match_id}"
+            res.send "Radiant towers remaining: #{radiantTowers} | Dire towers remaining: #{direTowers}"
+            res.send "Dotabuff: http://www.dotabuff.com/matches/#{match.match_id}"
 
             additionalInfo = (steamID, type = "Steam ID") ->
                 communityID = _GetCommunityID steamID
                 target = _GetPlayer communityID, match.players
                 unless target
-                    msg.reply "The #{type} you have entered (\"#{genericID}\") was not found in Match ID #{match.match_id}."
+                    res.reply "The #{type} you have entered (\"#{genericID}\") was not found in Match ID #{match.match_id}."
                     return
                 faction = _GetFaction target.player_slot
                 hero = DOTA_HEROES[target.hero_id] or "No hero"
-                msg.reply "#{faction} - #{hero} (Lvl #{target.level}) | KDA: #{target.kills}/#{target.deaths}/#{target.assists} | LH: #{target.last_hits} | GPM: #{target.gold_per_min} | XPM: #{target.xp_per_min} | HD: #{target.hero_damage} | TD: #{target.tower_damage} | TGE: #{target.gold_per_min*duration}"
+                res.reply "#{faction} - #{hero} (Lvl #{target.level}) | KDA: #{target.kills}/#{target.deaths}/#{target.assists} | LH: #{target.last_hits} | GPM: #{target.gold_per_min} | XPM: #{target.xp_per_min} | HD: #{target.hero_damage} | TD: #{target.tower_damage} | TGE: #{target.gold_per_min*duration}"
                 # Future (TODO): Team fight contribution? Overall contribution algo.
 
             if genericID?
                 if _IsSteamID genericID
                     additionalInfo steamID
                 else
-                    GetSteamID msg, genericID, (steamID) ->
+                    GetSteamID res, genericID, (steamID) ->
                         additionalInfo steamID, "profile URL"
