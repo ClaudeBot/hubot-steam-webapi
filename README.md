@@ -1,9 +1,11 @@
-# Hubot: Steam Web API
+# hubot-steam-webapi
 
 [![Build Status](https://travis-ci.org/ClaudeBot/hubot-steam-webapi.svg)](https://travis-ci.org/ClaudeBot/hubot-steam-webapi)
-[![Dependency Status](https://david-dm.org/ClaudeBot/hubot-steam-webapi.svg?style=flat-square)](https://david-dm.org/ClaudeBot/hubot-steam-webapi)
+[![Dependency Status](https://david-dm.org/ClaudeBot/hubot-steam-webapi.svg)](https://david-dm.org/ClaudeBot/hubot-steam-webapi)
 
 A Hubot script for interacting with Steam Web API (primarily for Dota 2).
+
+See [`src/steam.coffee`](src/steam.coffee) for full documentation.
 
 
 ## Installation via NPM
@@ -14,7 +16,7 @@ A Hubot script for interacting with Steam Web API (primarily for Dota 2).
     npm install --save hubot-steam-webapi
     ```
 
-2. Enable the script by adding the __hubot-steam-webapi__ entry to your `external-scripts.json` file:
+2. Enable the module by adding the __hubot-steam-webapi__ entry to your `external-scripts.json` file:
 
     ```json
     [
@@ -41,3 +43,11 @@ hubot steam id `[me] custom URL` | Returns the Steam ID for the user under http:
 hubot steam status `Steam ID or custom URL` | Returns `Steam ID` or `custom URL` community status
 hubot dota history `Steam ID or custom URL` | Returns metadata for the latest `DOTA_MAX_RESULTS` (or 5) game lobbies with `Steam ID` or `custom URL`
 hubot dota match `match ID [Steam ID or custom URL]` | Returns information about a particular `match ID`. Optionally, if `Steam ID` or `custom URL` is included, its match information will also be returned
+
+
+## Sample Interaction
+
+```
+user1>> hubot dota history MrSaints
+hubot>> Match ID: 1588262704 | Lobby: Ranked match | Hero: Winter Wyvern | 7 hours ago
+```
