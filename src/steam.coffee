@@ -214,13 +214,13 @@ module.exports = (robot) ->
     Init robot
 
     # GET 32-bit Steam ID
-    robot.respond /steam id( me)? (.+)/i, (res) ->
+    robot.respond /steam id( me)? (.+)/i, id: "steam.profile.id", (res) ->
         customURL = res.match[2]
         GetSteamID res, customURL, (steamID) ->
             res.reply "#{_PossessionModifier(customURL)} Steam ID is: #{steamID}"
 
     # GET Steam profile status
-    robot.respond /steam status (.+)/i, (res) ->
+    robot.respond /steam status (.+)/i, id: "steam.profile.status", (res) ->
         genericID = res.match[1]
         GetPlayerSummaries res, genericID, (player) ->
             status = _GetStatus player.personastate, player.communityvisibilitystate
@@ -228,7 +228,7 @@ module.exports = (robot) ->
             res.reply "#{genericID} belongs to #{player.personaname} who is currently #{status} and was last online #{lastOnline}."
 
     # GET Player Dota 2 match history (overview)
-    robot.respond /dota history (.+)/i, (res) ->
+    robot.respond /dota history (.+)/i, id: "steam.dota.history", (res) ->
         genericID = res.match[1]
         GetMatchHistory res, genericID, (steamID, history) ->
             communityID = _GetCommunityID steamID
@@ -241,7 +241,7 @@ module.exports = (robot) ->
                 res.send "Match ID: #{match.match_id} | Lobby: #{DOTA_LOBBIES[match.lobby_type]} | Hero: #{hero} | #{date}"
 
     # GET Player Dota 2 match details
-    robot.respond /dota match (\d+)\s*(.+)?/i, (res) ->
+    robot.respond /dota match (\d+)\s*(.+)?/i, id: "steam.dota.match", (res) ->
         matchID = res.match[1]
         genericID = res.match[2]
         GetMatchDetails res, matchID, (match) ->
