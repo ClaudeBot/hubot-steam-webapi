@@ -201,7 +201,7 @@ Init = (robot) ->
         DOTA_HEROES = heroes
 
     # TODO: Cleaner dependency
-    robot.brain.resetSaveInterval 1800
+    #robot.brain.resetSaveInterval 1800
     _brain = robot.brain
 
 _PossessionModifier = (noun) ->
